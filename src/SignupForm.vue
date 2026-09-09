@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { reactive, watchEffect, watch, ref, onMounted } from 'vue'
+import { reactive, watch, ref, onMounted, type Ref } from 'vue'
+import { useValidation } from './composables/useValidation'
+
 // import { useRouter } from 'vue-router'
 
 // const router = useRouter()
@@ -19,17 +21,13 @@ const form: LoginForm = reactive({
   agree: false,
 })
 
-const errors = reactive<LoginFormErrors>({
-  email: null,
-  password: null,
-  agree: null,
-})
-
-const errors2: LoginFormErrors = useValidation(form, {
+const errors = useValidation(form, {
   email: (value: LoginForm['email']) => /.+@.+/.test(value) ? null : 'Invalid email',
   password: (value: LoginForm['password']) => value && value.length >= 8 ? null : 'min length: 8',
   agree: (value: LoginForm['agree']) => value ? null : 'You must agree',
-})
+}) as Ref<LoginFormErrors>
+
+
 
 const loading = ref(false)
 const toast = (msg: string) => alert(msg) // псевдо-тост
@@ -54,7 +52,7 @@ watch(
 )
 
 async function submit() {
-  if (errors.email || errors.password || errors.agree) return
+  if (errors.value.email || errors.value.password || errors.value.agree) return
   loading.value = true
   try {
     await new Promise((r) => setTimeout(r, 400)) // имитация API
