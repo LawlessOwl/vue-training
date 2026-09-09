@@ -3,17 +3,32 @@ import { reactive, watchEffect, watch, ref, onMounted } from 'vue'
 // import { useRouter } from 'vue-router'
 
 // const router = useRouter()
+type LoginForm = {
+  email: string
+  password: string
+  agree: boolean
+}
 
-const form = reactive({
+type LoginFormErrors = {
+  [K in keyof LoginForm]: string | null
+}
+
+const form: LoginForm = reactive({
   email: '',
   password: '',
   agree: false,
 })
 
-const errors = reactive<{ email: string | null; password: string | null; agree: string | null }>({
+const errors = reactive<LoginFormErrors>({
   email: null,
   password: null,
   agree: null,
+})
+
+const errors2: LoginFormErrors = useValidation(form, {
+  email: (value: LoginForm['email']) => /.+@.+/.test(value) ? null : 'Invalid email',
+  password: (value: LoginForm['password']) => value && value.length >= 8 ? null : 'min length: 8',
+  agree: (value: LoginForm['agree']) => value ? null : 'You must agree',
 })
 
 const loading = ref(false)
@@ -28,12 +43,6 @@ onMounted(() => {
   } catch {
     /* ignore */
   }
-})
-
-watchEffect(() => {
-  errors.email = /.+@.+/.test(form.email) ? null : 'Invalid email'
-  errors.password = form.password.length >= 8 ? null : 'min length: 8'
-  errors.agree = form.agree ? null : 'You must agree'
 })
 
 watch(
