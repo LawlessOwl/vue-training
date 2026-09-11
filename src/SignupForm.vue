@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { reactive, watch, ref, onMounted, type Ref } from 'vue'
+import { reactive, ref, type Ref } from 'vue'
 import { useValidation } from './composables/useValidation'
-
+import { useDraft } from './composables/useDraft'
 // import { useRouter } from 'vue-router'
 
 // const router = useRouter()
@@ -32,24 +32,7 @@ const errors = useValidation(form, {
 const loading = ref(false)
 const toast = (msg: string) => alert(msg) // псевдо-тост
 
-onMounted(() => {
-  try {
-    const raw = localStorage.getItem('signup:draft')
-    if (!raw) return
-    const data = JSON.parse(raw)
-    Object.assign(form, data)
-  } catch {
-    /* ignore */
-  }
-})
-
-watch(
-  form,
-  () => {
-    localStorage.setItem('signup:draft', JSON.stringify(form))
-  },
-  { deep: true },
-)
+useDraft('signup:draft', form)
 
 async function submit() {
   if (errors.value.email || errors.value.password || errors.value.agree) return
