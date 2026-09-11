@@ -2,6 +2,8 @@
 import { reactive, ref, type Ref } from 'vue'
 import { useValidation } from './composables/useValidation'
 import { useDraft } from './composables/useDraft'
+import { useFormState } from './composables/useFormState'
+
 // import { useRouter } from 'vue-router'
 
 // const router = useRouter()
@@ -20,6 +22,9 @@ const form: LoginForm = reactive({
   password: '',
   agree: false,
 })
+
+const touchedFields = useFormState(form)
+console.log(touchedFields)
 
 const errors = useValidation(form, {
   email: (value: LoginForm['email']) => /.+@.+/.test(value) ? null : 'Invalid email',
@@ -50,13 +55,13 @@ async function submit() {
 <template>
   <form @submit.prevent="submit">
     <label>Email <input v-model="form.email" /></label>
-    <span class="error" v-if="errors.email">{{ errors.email }}</span>
+    <span class="error" v-if="touchedFields.email && errors.email">{{ errors.email }}</span>
 
     <label>Password <input type="password" v-model="form.password" /></label>
-    <span class="error" v-if="errors.password">{{ errors.password }}</span>
+    <span class="error" v-if="touchedFields.password && errors.password">{{ errors.password }}</span>
 
     <label><input type="checkbox" v-model="form.agree" /> I agree</label>
-    <span class="error" v-if="errors.agree">{{ errors.agree }}</span>
+    <span class="error" v-if="touchedFields.agree && errors.agree">{{ errors.agree }}</span>
 
     <button :disabled="loading">Create account</button>
   </form>
